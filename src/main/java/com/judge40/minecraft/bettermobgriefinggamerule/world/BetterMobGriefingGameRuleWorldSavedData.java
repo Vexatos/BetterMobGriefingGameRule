@@ -39,7 +39,32 @@ import net.minecraft.world.storage.MapStorage;
  */
 public class BetterMobGriefingGameRuleWorldSavedData extends WorldSavedData {
 
-  public Map<String, String> entityNamesToMobGriefingValue = new HashMap<>();
+  private Map<String, String> entityNamesToMobGriefingValue = new HashMap<>();
+
+  public Set<String> getMobGriefingEntityNames() {
+  	return entityNamesToMobGriefingValue.keySet();
+  }
+
+  public boolean hasMobGriefingValue(String entityName) {
+    return entityNamesToMobGriefingValue.containsKey(entityName);
+  }
+
+  public String getMobGriefingValue(String entityName) {
+    return entityNamesToMobGriefingValue.get(entityName);
+  }
+
+  public void setMobGriefingValue(String entityName, String value) {
+    entityNamesToMobGriefingValue.put(entityName, value);
+    markDirty();
+  }
+  public String setMobGriefingValueIfAbsent(String entityName, String value) {
+	String rule = entityNamesToMobGriefingValue.get(entityName);
+	if(rule == null) {
+	  rule = entityNamesToMobGriefingValue.put(entityName, value);
+	  markDirty();
+	}
+    return rule;
+  }
 
   /**
    * @param identifier
@@ -50,45 +75,46 @@ public class BetterMobGriefingGameRuleWorldSavedData extends WorldSavedData {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.minecraft.world.WorldSavedData#readFromNBT(net.minecraft.nbt.NBTTagCompound)
    */
   @Override
   public void readFromNBT(NBTTagCompound nbtTagCompound) {
-    Set<?> keys = nbtTagCompound.func_150296_c();
+    Set<String> keys = nbtTagCompound.getKeySet();
 
-    for (Object key : keys) {
-      String value = nbtTagCompound.getString((String) key);
-      entityNamesToMobGriefingValue.put((String) key, value);
+    for (String key : keys) {
+      String value = nbtTagCompound.getString(key);
+      entityNamesToMobGriefingValue.put(key, value);
     }
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.minecraft.world.WorldSavedData#writeToNBT(net.minecraft.nbt.NBTTagCompound)
    */
   @Override
-  public void writeToNBT(NBTTagCompound nbtTagCompound) {
+  public NBTTagCompound writeToNBT(NBTTagCompound nbtTagCompound) {
     for (Entry<String, String> entityNameToMobGriefingValue : entityNamesToMobGriefingValue
         .entrySet()) {
       nbtTagCompound.setString(entityNameToMobGriefingValue.getKey(),
           entityNameToMobGriefingValue.getValue());
     }
+    return nbtTagCompound;
   }
 
   /**
    * Get the {@link BetterMobGriefingGameRuleWorldSavedData} for a given {@link World}. If world
    * saved data does not already exist then a new instance is created and added to the map storage.
-   * 
+   *
    * @param world The world to get the saved data for
    * @return The world saved data
    */
   public static BetterMobGriefingGameRuleWorldSavedData forWorld(World world) {
-    MapStorage mapStorage = world.mapStorage;
+    MapStorage mapStorage = world.getPerWorldStorage();
     BetterMobGriefingGameRuleWorldSavedData betterMobGriefingGameRuleWorldSavedData =
-        (BetterMobGriefingGameRuleWorldSavedData) mapStorage.loadData(
-            BetterMobGriefingGameRuleWorldSavedData.class, BetterMobGriefingGameRule.MODID);
+        ((BetterMobGriefingGameRuleWorldSavedData) mapStorage.getOrLoadData(
+            BetterMobGriefingGameRuleWorldSavedData.class, BetterMobGriefingGameRule.MODID));
 
     if (betterMobGriefingGameRuleWorldSavedData == null) {
       betterMobGriefingGameRuleWorldSavedData =
@@ -101,7 +127,7 @@ public class BetterMobGriefingGameRuleWorldSavedData extends WorldSavedData {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

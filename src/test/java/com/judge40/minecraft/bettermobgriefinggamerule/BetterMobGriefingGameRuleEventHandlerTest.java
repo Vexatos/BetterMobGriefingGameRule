@@ -32,7 +32,7 @@ import org.junit.Test;
 
 import com.judge40.minecraft.bettermobgriefinggamerule.entity.ai.BetterMobGriefingGameRuleEntityAIBreakDoor;
 
-import cpw.mods.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import mockit.Deencapsulation;
 import mockit.Mock;
 import mockit.MockUp;

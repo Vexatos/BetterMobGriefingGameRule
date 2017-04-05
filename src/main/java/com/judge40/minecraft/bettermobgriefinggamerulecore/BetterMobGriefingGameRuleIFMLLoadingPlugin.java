@@ -20,7 +20,7 @@ package com.judge40.minecraft.bettermobgriefinggamerulecore;
 
 import java.util.Map;
 
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 
 /**
  * Loading plugin for BetterMobGriefingGameRule core mod
@@ -35,7 +35,7 @@ public class BetterMobGriefingGameRuleIFMLLoadingPlugin implements IFMLLoadingPl
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.relauncher.IFMLLoadingPlugin#getASMTransformerClass()
+   * @see net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#getASMTransformerClass()
    */
   @Override
   public String[] getASMTransformerClass() {
@@ -45,7 +45,7 @@ public class BetterMobGriefingGameRuleIFMLLoadingPlugin implements IFMLLoadingPl
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.relauncher.IFMLLoadingPlugin#getModContainerClass()
+   * @see net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#getModContainerClass()
    */
   @Override
   public String getModContainerClass() {
@@ -55,7 +55,7 @@ public class BetterMobGriefingGameRuleIFMLLoadingPlugin implements IFMLLoadingPl
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.relauncher.IFMLLoadingPlugin#getSetupClass()
+   * @see net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#getSetupClass()
    */
   @Override
   public String getSetupClass() {
@@ -65,7 +65,7 @@ public class BetterMobGriefingGameRuleIFMLLoadingPlugin implements IFMLLoadingPl
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.relauncher.IFMLLoadingPlugin#injectData(java.util.Map)
+   * @see net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#injectData(java.util.Map)
    */
   @Override
   public void injectData(Map<String, Object> data) {
@@ -75,7 +75,7 @@ public class BetterMobGriefingGameRuleIFMLLoadingPlugin implements IFMLLoadingPl
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.relauncher.IFMLLoadingPlugin#getAccessTransformerClass()
+   * @see net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#getAccessTransformerClass()
    */
   @Override
   public String getAccessTransformerClass() {

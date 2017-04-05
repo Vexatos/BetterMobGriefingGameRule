@@ -31,13 +31,13 @@ import java.util.Set;
 import com.judge40.minecraft.bettermobgriefinggamerule.command.BetterMobGriefingGameRuleCommandGameRule;
 import com.judge40.minecraft.bettermobgriefinggamerule.world.BetterMobGriefingGameRuleWorldSavedData;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraft.command.CommandGameRule;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
@@ -52,7 +52,6 @@ import net.minecraft.entity.monster.EntityGhast;
 import net.minecraft.entity.monster.EntitySilverfish;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
@@ -68,7 +67,7 @@ public class BetterMobGriefingGameRule {
   // Constants for mod attributes
   public static final String MODID = "bettermobgriefinggamerule";
   public static final String NAME = "Better mobGriefing GameRule";
-  public static final String VERSION = "1.7.10-0.4.0";
+  public static final String VERSION = "@VERSION@";
   public static final String GUI_FACTORY =
       "com.judge40.minecraft.bettermobgriefinggamerule.client.BetterMobGriefingGameRuleConfigGuiFactory";
 
@@ -140,7 +139,7 @@ public class BetterMobGriefingGameRule {
     Set<String> entityNames = new HashSet<>(category.keySet());
 
     for (Class<? extends EntityLiving> entityClass : MOB_GRIEFING_ENTITY_CLASSES) {
-      String entityName = (String) EntityList.classToStringMapping.get(entityClass);
+      String entityName = EntityList.CLASS_TO_NAME.get(entityClass);
       entityNames.add(entityName);
     }
 
@@ -150,7 +149,7 @@ public class BetterMobGriefingGameRule {
     // Get the configuration value for each entity, if the configuration entry is missing for an
     // entity then a new entry is created
     for (String entityName : entityNames) {
-      Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(entityName);
+      Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(entityName);
 
       if (entityClass != null && EntityLiving.class.isAssignableFrom(entityClass)) {
         String propertyValue = configuration.getString(entityName,
@@ -170,7 +169,7 @@ public class BetterMobGriefingGameRule {
   /**
    * On initialisation registers the event handler
    * 
-   * @param event The FMLInitializationEvent
+   * @param initializationEvent The FMLInitializationEvent
    */
   @EventHandler
   public void onFMLInitializationEvent(FMLInitializationEvent initializationEvent) {
@@ -201,8 +200,6 @@ public class BetterMobGriefingGameRule {
         commandHandler, "commandSet", "field_71561_b");
     commandSet.remove(originalCommandGameRule);
 
-    // TODO: remove migration before release of 1.0.0
-    MigratePre030BetterMobGriefingGameRule.migrateGameRulesToWorldData();
     // Add new game rules to world data
     addMobGriefingGameRules();
   }
@@ -211,7 +208,7 @@ public class BetterMobGriefingGameRule {
    * Add mobGriefing game rules for the mob griefing entities
    */
   public static void addMobGriefingGameRules() {
-    World world = MinecraftServer.getServer().getEntityWorld();
+    World world = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
 
     // Set the global mobGriefing game rule value if this is a new world
     if (world.getTotalWorldTime() == 0) {
@@ -227,11 +224,7 @@ public class BetterMobGriefingGameRule {
       String defaultValue = defaultEntityRule.getValue();
 
       // Add the rule only if it does not already exist
-      String currentValue =
-          worldSavedData.entityNamesToMobGriefingValue.putIfAbsent(entityName, defaultValue);
-      if (currentValue == null) {
-        worldSavedData.setDirty(true);
-      }
+      worldSavedData.setMobGriefingValueIfAbsent(entityName, defaultValue);
     }
   }
 
@@ -248,7 +241,7 @@ public class BetterMobGriefingGameRule {
     if (entityName != null) {
       BetterMobGriefingGameRuleWorldSavedData worldSavedData =
           BetterMobGriefingGameRuleWorldSavedData.forWorld(entity.worldObj);
-      String mobGriefingValue = worldSavedData.entityNamesToMobGriefingValue.get(entityName);
+      String mobGriefingValue = worldSavedData.getMobGriefingValue(entityName);
 
       if (Objects.equals(mobGriefingValue, Boolean.toString(true))
           || Objects.equals(mobGriefingValue, Boolean.toString(false))) {
@@ -258,7 +251,7 @@ public class BetterMobGriefingGameRule {
 
     if (mobGriefingEnabled == null) {
       mobGriefingEnabled = entity.worldObj.getGameRules()
-          .getGameRuleBooleanValue(BetterMobGriefingGameRule.ORIGINAL);
+          .getBoolean(BetterMobGriefingGameRule.ORIGINAL);
     }
 
     return mobGriefingEnabled;

@@ -22,9 +22,10 @@ import java.util.Iterator;
 
 import com.judge40.minecraft.bettermobgriefinggamerule.entity.ai.BetterMobGriefingGameRuleEntityAIBreakDoor;
 
-import cpw.mods.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -44,12 +45,12 @@ public class BetterMobGriefingGameRuleEventHandler {
 
   /**
    * Store configuration changes
-   * 
+   *
    * @param configChangedEvent The OnConfigChangedEvent
    */
   @SubscribeEvent
   public void onConfigChangedEvent(OnConfigChangedEvent configChangedEvent) {
-    if (configChangedEvent.modID.equals(BetterMobGriefingGameRule.MODID)) {
+    if (configChangedEvent.getModID().equals(BetterMobGriefingGameRule.MODID)) {
       BetterMobGriefingGameRule.configuration.save();
       BetterMobGriefingGameRule.populateDefaultMobGriefingRulesFromConfiguration();
     }
@@ -58,16 +59,16 @@ public class BetterMobGriefingGameRuleEventHandler {
   /**
    * On the explosion detonate event check whether mobGriefing is enabled for a specific entity and
    * update the relevant fields to reflect the desired value
-   * 
+   *
    * @param detonateEvent The detonate event for the explosion to update
    */
   @SubscribeEvent
   public void onDetonateEvent(Detonate detonateEvent) {
-    GameRules gameRules = detonateEvent.world.getGameRules();
+    GameRules gameRules = detonateEvent.getWorld().getGameRules();
 
     // Get explosion source entity
     Entity exploder = ObfuscationReflectionHelper.getPrivateValue(Explosion.class,
-        detonateEvent.explosion, "exploder", "field_77283_e");
+        detonateEvent.getExplosion(), "exploder", "field_77283_e");
     EntityLivingBase entity = null;
 
     if (exploder instanceof EntityLivingBase) {
@@ -86,9 +87,10 @@ public class BetterMobGriefingGameRuleEventHandler {
 
           // Compare the fireball and explosion positions to determine if the fireball is the source
           // of the explosion
-          if (entityFireball.posX == detonateEvent.explosion.explosionX
-              && entityFireball.posY == detonateEvent.explosion.explosionY
-              && entityFireball.posZ == detonateEvent.explosion.explosionZ) {
+          Vec3d pos = detonateEvent.getExplosion().getPosition();
+          if (entityFireball.posX == pos.xCoord
+              && entityFireball.posY == pos.yCoord
+              && entityFireball.posZ == pos.zCoord) {
             entity = entityFireball.shootingEntity;
             break;
           }
@@ -102,11 +104,11 @@ public class BetterMobGriefingGameRuleEventHandler {
           BetterMobGriefingGameRule.isMobGriefingEnabled((EntityLiving) entity);
 
       boolean mobGriefingOriginal =
-          gameRules.getGameRuleBooleanValue(BetterMobGriefingGameRule.ORIGINAL);
+          gameRules.getBoolean(BetterMobGriefingGameRule.ORIGINAL);
 
       // If better mobGriefing has overridden the default value then update relevant flag
       if (mobGriefingEnabled ^ mobGriefingOriginal) {
-        ObfuscationReflectionHelper.setPrivateValue(Explosion.class, detonateEvent.explosion,
+        ObfuscationReflectionHelper.setPrivateValue(Explosion.class, detonateEvent.getExplosion(),
             mobGriefingEnabled, "isSmoking", "field_82755_b");
       }
 
@@ -120,13 +122,13 @@ public class BetterMobGriefingGameRuleEventHandler {
   /**
    * When an Entity joins the world update the relevant fields and tasks to allow the new
    * mobGriefing game rule to override the original rule
-   * 
+   *
    * @param entityJoinWorldEvent The EntityJoinWorldEvent for the Entity to be updated
    */
   @SubscribeEvent
   public void onEntityJoinWorldEvent(EntityJoinWorldEvent entityJoinWorldEvent) {
-    if (entityJoinWorldEvent.entity instanceof EntityZombie) {
-      EntityZombie entityZombie = (EntityZombie) entityJoinWorldEvent.entity;
+    if (entityJoinWorldEvent.getEntity() instanceof EntityZombie) {
+      EntityZombie entityZombie = (EntityZombie) entityJoinWorldEvent.getEntity();
 
       // Get existing "BreakDoor" task
       EntityAIBreakDoor entityAiBreakDoor = ObfuscationReflectionHelper

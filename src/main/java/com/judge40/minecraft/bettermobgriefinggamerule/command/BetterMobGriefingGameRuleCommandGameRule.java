@@ -25,13 +25,19 @@ import java.util.List;
 import com.judge40.minecraft.bettermobgriefinggamerule.BetterMobGriefingGameRule;
 import com.judge40.minecraft.bettermobgriefinggamerule.world.BetterMobGriefingGameRuleWorldSavedData;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandGameRule;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.GameRules;
+
+import javax.annotation.Nullable;
 
 /**
  *
@@ -45,7 +51,7 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
    * java.lang.String[])
    */
   @Override
-  public void processCommand(ICommandSender commandSender, String[] commandWords) {
+  public void execute(MinecraftServer server, ICommandSender commandSender, String[] commandWords) throws CommandException {
     if (commandWords.length >= 1 && commandWords.length <= 3
         && commandWords[0].equals(BetterMobGriefingGameRule.ORIGINAL)) {
       BetterMobGriefingGameRuleWorldSavedData worldSavedData =
@@ -55,7 +61,7 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
 
         GameRules gameRules = commandSender.getEntityWorld().getGameRules();
         String mobGriefingValue =
-            gameRules.getGameRuleStringValue(BetterMobGriefingGameRule.ORIGINAL);
+            gameRules.getString(BetterMobGriefingGameRule.ORIGINAL);
 
         StringBuilder messageBuilder = new StringBuilder();
         messageBuilder
@@ -66,40 +72,40 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
           messageBuilder.append(worldSavedData.toString());
         }
 
-        commandSender.addChatMessage(new ChatComponentText(messageBuilder.toString()));
+        commandSender.addChatMessage(new TextComponentString(messageBuilder.toString()));
       } else if (commandWords.length == 2) {
 
         if (commandWords[1].equals(Boolean.toString(true))
             || commandWords[1].equals(Boolean.toString(false))) {
-          super.processCommand(commandSender, commandWords);
+          super.execute(server, commandSender, commandWords);
         } else {
 
-          if (worldSavedData.entityNamesToMobGriefingValue.containsKey(commandWords[1])) {
+          if (worldSavedData.hasMobGriefingValue(commandWords[1])) {
             String message = String.format("%s %s = %s", BetterMobGriefingGameRule.ORIGINAL,
-                commandWords[1], worldSavedData.entityNamesToMobGriefingValue.get(commandWords[1]));
-            commandSender.addChatMessage(new ChatComponentText(message));
+                commandWords[1], worldSavedData.getMobGriefingValue(commandWords[1]));
+            commandSender.addChatMessage(new TextComponentString(message));
           } else {
             String message =
                 String.format("%s %s", BetterMobGriefingGameRule.ORIGINAL, commandWords[1]);
-            func_152373_a(commandSender, this, "commands.gamerule.norule", new Object[] {message});
+            notifyCommandListener(commandSender, this, "commands.gamerule.norule", message);
           }
         }
 
       } else if (commandWords.length == 3) {
-        Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(commandWords[1]);
+        Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(commandWords[1]);
 
         if (entityClass != null && EntityLiving.class.isAssignableFrom(entityClass)) {
 
           if (commandWords[2].equals(Boolean.toString(true))
               || commandWords[2].equals(Boolean.toString(false))
               || commandWords[2].equals(BetterMobGriefingGameRule.INHERIT)) {
-            worldSavedData.entityNamesToMobGriefingValue.put(commandWords[1], commandWords[2]);
-            func_152373_a(commandSender, this, "commands.gamerule.success", new Object[0]);
+            worldSavedData.setMobGriefingValue(commandWords[1], commandWords[2]);
+            notifyCommandListener(commandSender, this, "commands.gamerule.success", "mobGriefing " + commandWords[1], commandWords[2]);
           } else {
             String exceptionMessage = String.format("/gamerule %s <entity name> %s|%s|%s",
                 BetterMobGriefingGameRule.ORIGINAL, Boolean.toString(true), Boolean.toString(false),
                 BetterMobGriefingGameRule.INHERIT);
-            throw new WrongUsageException(exceptionMessage, new Object[0]);
+            throw new WrongUsageException(exceptionMessage);
           }
         } else {
           throw new WrongUsageException(
@@ -107,7 +113,7 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
         }
       }
     } else {
-      super.processCommand(commandSender, commandWords);
+      super.execute(server, commandSender, commandWords);
     }
   }
 
@@ -118,8 +124,8 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
    * ICommandSender, java.lang.String[])
    */
   @Override
-  public List<?> addTabCompletionOptions(ICommandSender commandSender, String[] commandWords) {
-    List<?> tabCompletionOptions = null;
+  public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender commandSender, String[] commandWords, @Nullable BlockPos pos) {
+    List<String> tabCompletionOptions = new ArrayList<>();
 
     if (commandWords.length > 1 && commandWords[0].equals(BetterMobGriefingGameRule.ORIGINAL)) {
       List<String> possibleWords = new ArrayList<>();
@@ -130,7 +136,7 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
         BetterMobGriefingGameRuleWorldSavedData betterMobGriefingGameRuleWorldSavedData =
             BetterMobGriefingGameRuleWorldSavedData.forWorld(commandSender.getEntityWorld());
         List<String> entityNames = new ArrayList<>(
-            betterMobGriefingGameRuleWorldSavedData.entityNamesToMobGriefingValue.keySet());
+            betterMobGriefingGameRuleWorldSavedData.getMobGriefingEntityNames());
         Collections.sort(entityNames);
 
         possibleWords.addAll(entityNames);
@@ -138,7 +144,7 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
             possibleWords.toArray(new String[possibleWords.size()]));
       } else if (commandWords.length == 3) {
         possibleWords.add(BetterMobGriefingGameRule.INHERIT);
-        Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(commandWords[1]);
+        Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(commandWords[1]);
 
         if (entityClass != null) {
           tabCompletionOptions = getListOfStringsMatchingLastWord(commandWords,
@@ -146,7 +152,7 @@ public class BetterMobGriefingGameRuleCommandGameRule extends CommandGameRule {
         }
       }
     } else {
-      tabCompletionOptions = super.addTabCompletionOptions(commandSender, commandWords);
+      tabCompletionOptions = super.getTabCompletionOptions(server, commandSender, commandWords, pos);
     }
 
     return tabCompletionOptions;

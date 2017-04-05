@@ -24,9 +24,9 @@ import java.util.Set;
 
 import com.judge40.minecraft.bettermobgriefinggamerule.BetterMobGriefingGameRule;
 
-import cpw.mods.fml.client.IModGuiFactory;
-import cpw.mods.fml.client.config.GuiConfig;
-import cpw.mods.fml.client.config.IConfigElement;
+import net.minecraftforge.fml.client.IModGuiFactory;
+import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
@@ -39,7 +39,7 @@ public class BetterMobGriefingGameRuleConfigGuiFactory implements IModGuiFactory
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.client.IModGuiFactory#initialize(net.minecraft.client.Minecraft)
+   * @see net.minecraftforge.fml.client.IModGuiFactory#initialize(net.minecraft.client.Minecraft)
    */
   @Override
   public void initialize(Minecraft minecraftInstance) {
@@ -49,7 +49,7 @@ public class BetterMobGriefingGameRuleConfigGuiFactory implements IModGuiFactory
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.client.IModGuiFactory#mainConfigGuiClass()
+   * @see net.minecraftforge.fml.client.IModGuiFactory#mainConfigGuiClass()
    */
   @Override
   public Class<? extends GuiScreen> mainConfigGuiClass() {
@@ -59,7 +59,7 @@ public class BetterMobGriefingGameRuleConfigGuiFactory implements IModGuiFactory
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.client.IModGuiFactory#runtimeGuiCategories()
+   * @see net.minecraftforge.fml.client.IModGuiFactory#runtimeGuiCategories()
    */
   @Override
   public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
@@ -69,7 +69,7 @@ public class BetterMobGriefingGameRuleConfigGuiFactory implements IModGuiFactory
   /*
    * (non-Javadoc)
    * 
-   * @see cpw.mods.fml.client.IModGuiFactory#getHandlerFor(cpw.mods.fml.client.IModGuiFactory.
+   * @see net.minecraftforge.fml.client.IModGuiFactory#getHandlerFor(net.minecraftforge.fml.client.IModGuiFactory.
    * RuntimeOptionCategoryElement)
    */
   @Override
@@ -96,7 +96,7 @@ public class BetterMobGriefingGameRuleConfigGuiFactory implements IModGuiFactory
     @SuppressWarnings("rawtypes")
     private static List<IConfigElement> getConfigElements() {
       return Collections
-          .singletonList(new ConfigElement<>(BetterMobGriefingGameRule.configuration.getCategory(
+          .singletonList(new ConfigElement(BetterMobGriefingGameRule.configuration.getCategory(
               BetterMobGriefingGameRule.DEFAULT_MOBGRIEFING_VALUES_CONFIGURATION_CATEGORY)));
     }
   }

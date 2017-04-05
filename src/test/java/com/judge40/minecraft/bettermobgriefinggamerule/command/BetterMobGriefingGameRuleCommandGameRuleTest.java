@@ -22,6 +22,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -41,7 +45,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
@@ -89,28 +92,28 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * Test that the parent class's method is called when there are no command words
    */
   @Test
-  public void testProcessCommand_zeroWords_callParent() {
+  public void testProcessCommand_zeroWords_callParent() throws CommandException {
     new MockUp<CommandGameRule>() {
       @Mock(invocations = 1)
       void processCommand(ICommandSender commandSender, String[] commandWords) {
 
       }
     };
-    commandGameRule.processCommand(null, new String[0]);
+    commandGameRule.execute(null, null, new String[0]);
   }
 
   /**
    * Test that the parent class's method is called when the first command word is not "mobGriefing"
    */
   @Test
-  public void testProcessCommand_firstWordNotMobGriefing_callParent() {
+  public void testProcessCommand_firstWordNotMobGriefing_callParent() throws CommandException {
     new MockUp<CommandGameRule>() {
       @Mock(invocations = 1)
       void processCommand(ICommandSender commandSender, String[] commandWords) {
 
       }
     };
-    commandGameRule.processCommand(null, new String[] {"notMobGriefing", "true"});
+    commandGameRule.execute(null, null, new String[] {"notMobGriefing", "true"});
   }
 
   /**
@@ -118,10 +121,10 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * is the single word "mobGriefing" and there are no custom rules in the world data
    */
   @Test
-  public void testProcessComannd_oneWordFirstWordMobGriefingNoCustomRulesExist_outputOnlyOriginalRuleValueToSender() {
+  public void testProcessComannd_oneWordFirstWordMobGriefingNoCustomRulesExist_outputOnlyOriginalRuleValueToSender() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock(invocations = 1)
-      void addChatMessage(IChatComponent chatComponent) {
+      void addChatMessage(ITextComponent chatComponent) {
         String sentChatMessage = chatComponent.getUnformattedText();
         String expectedChatMessage =
             String.format("%s = %s", BetterMobGriefingGameRule.ORIGINAL, Boolean.toString(true));
@@ -140,7 +143,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
     world.getGameRules().setOrCreateGameRule(BetterMobGriefingGameRule.ORIGINAL,
         Boolean.toString(true));
 
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing"});
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing"});
   }
 
   /**
@@ -148,10 +151,10 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * single word "mobGriefing" and there are custom rules in the world data
    */
   @Test
-  public void testProcessComannd_oneWordFirstWordMobGriefingCustomRulesExist_outputAllRuleValuesToSender() {
+  public void testProcessComannd_oneWordFirstWordMobGriefingCustomRulesExist_outputAllRuleValuesToSender() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock(invocations = 1)
-      void addChatMessage(IChatComponent chatComponent) {
+      void addChatMessage(ITextComponent chatComponent) {
         String sentChatMessage = chatComponent.getUnformattedText();
 
         String originalMobGriefingValue =
@@ -174,11 +177,11 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
     world.getGameRules().setOrCreateGameRule(BetterMobGriefingGameRule.ORIGINAL,
         Boolean.toString(true));
     worldSavedData.entityNamesToMobGriefingValue.put(
-        (String) EntityList.classToStringMapping.get(EntityCreeper.class), Boolean.toString(false));
+        EntityList.CLASS_TO_NAME.get(EntityCreeper.class), Boolean.toString(false));
     worldSavedData.entityNamesToMobGriefingValue.put(
-        (String) EntityList.classToStringMapping.get(EntityZombie.class), Boolean.toString(true));
+        EntityList.CLASS_TO_NAME.get(EntityZombie.class), Boolean.toString(true));
 
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing"});
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing"});
   }
 
   /**
@@ -186,7 +189,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * given a value of "true"
    */
   @Test
-  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordTrue_callParent() {
+  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordTrue_callParent() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -201,7 +204,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     };
 
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing", "true"});
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing", "true"});
   }
 
   /**
@@ -209,7 +212,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * given a value of "false"
    */
   @Test
-  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordFalse_callParent() {
+  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordFalse_callParent() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -224,7 +227,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     };
 
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing", "false"});
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing", "false"});
   }
 
   /**
@@ -233,10 +236,10 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * custom rule
    */
   @Test
-  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordMatchingEntityName_outputRuleValueToSender() {
+  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordMatchingEntityName_outputRuleValueToSender() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock(invocations = 1)
-      void addChatMessage(IChatComponent chatComponent) {
+      void addChatMessage(ITextComponent chatComponent) {
         String sentChatMessage = chatComponent.getUnformattedText();
         String expectedChatMessage = String.format("%s %s = %s", BetterMobGriefingGameRule.ORIGINAL,
             "dummyEntityName", Boolean.toString(false));
@@ -254,7 +257,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
 
     worldSavedData.entityNamesToMobGriefingValue.put("dummyEntityName", "false");
 
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing", "dummyEntityName"});
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing", "dummyEntityName"});
   }
 
   /**
@@ -262,7 +265,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * and the second word is an entity name with no matching custom rule
    */
   @Test
-  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordNoMatchingEntityName_outputNoRuleMessageToSender() {
+  public void testProcessComannd_twoWordsFirstWordMobGriefingSecondWordNoMatchingEntityName_outputNoRuleMessageToSender() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -285,7 +288,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     };
 
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing", "dummyEntityName"});
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing", "dummyEntityName"});
   }
 
   /**
@@ -293,7 +296,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * "mobGriefing", the second word is a registered entity name and the third word is "true"
    */
   @Test
-  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredEntityLivingThirdWordTrue_entityMobGriefingValueUpdated() {
+  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredEntityLivingThirdWordTrue_entityMobGriefingValueUpdated() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -316,8 +319,8 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     };
 
-    String entityName = (String) EntityList.classToStringMapping.get(EntityCreeper.class);
-    commandGameRule.processCommand(commandSender, new String[] {"mobGriefing", entityName, "true"});
+    String entityName = (String) EntityList.CLASS_TO_NAME.get(EntityCreeper.class);
+    commandGameRule.execute(null, commandSender, new String[] {"mobGriefing", entityName, "true"});
 
     String entityMobGriefingValue = worldSavedData.entityNamesToMobGriefingValue.get(entityName);
     Assert.assertThat("The entities mob griefing value does not match the expected value.",
@@ -329,7 +332,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * "mobGriefing", the second word is a registered entity name and the third word is "false"
    */
   @Test
-  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredEntityLivingThirdWordFalse_entityMobGriefingValueUpdated() {
+  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredEntityLivingThirdWordFalse_entityMobGriefingValueUpdated() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -352,8 +355,8 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     };
 
-    String entityName = (String) EntityList.classToStringMapping.get(EntityCreeper.class);
-    commandGameRule.processCommand(commandSender,
+    String entityName = (String) EntityList.CLASS_TO_NAME.get(EntityCreeper.class);
+    commandGameRule.execute(null, commandSender,
         new String[] {"mobGriefing", entityName, "false"});
 
     String entityMobGriefingValue = worldSavedData.entityNamesToMobGriefingValue.get(entityName);
@@ -366,7 +369,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * second word is a registered entity name and the third word is invalid
    */
   @Test(expected = WrongUsageException.class)
-  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredEntityLivingThirdWordInvalidValue_wrongUsageException() {
+  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredEntityLivingThirdWordInvalidValue_wrongUsageException() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -374,8 +377,8 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     }.getMockInstance();
 
-    String entityName = (String) EntityList.classToStringMapping.get(EntityCreeper.class);
-    commandGameRule.processCommand(commandSender,
+    String entityName = (String) EntityList.CLASS_TO_NAME.get(EntityCreeper.class);
+    commandGameRule.execute(null, commandSender,
         new String[] {"mobGriefing", entityName, "invalidValue"});
 
     String entityMobGriefingValue = worldSavedData.entityNamesToMobGriefingValue.get(entityName);
@@ -388,7 +391,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * second word is a registered non-EntityLiving entity name
    */
   @Test(expected = WrongUsageException.class)
-  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredNonEntityLiving_wrongUsageException() {
+  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordRegisteredNonEntityLiving_wrongUsageException() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -396,8 +399,8 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     }.getMockInstance();
 
-    String entityName = (String) EntityList.classToStringMapping.get(EntityPlayer.class);
-    commandGameRule.processCommand(commandSender,
+    String entityName = (String) EntityList.CLASS_TO_NAME.get(EntityPlayer.class);
+    commandGameRule.execute(null, commandSender,
         new String[] {"mobGriefing", entityName, "invalidValue"});
 
     String entityMobGriefingValue = worldSavedData.entityNamesToMobGriefingValue.get(entityName);
@@ -410,7 +413,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * second word is not a registered entity name
    */
   @Test(expected = WrongUsageException.class)
-  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordNotRegisteredEntity_wrongUsageException() {
+  public void testProcessCommand_threeWordsFirstWordMobGriefingSecondWordNotRegisteredEntity_wrongUsageException() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -418,7 +421,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     }.getMockInstance();
 
-    commandGameRule.processCommand(commandSender,
+    commandGameRule.execute(null, commandSender,
         new String[] {"mobGriefing", "dummyEntityName", "invalidValue"});
 
     String entityMobGriefingValue =
@@ -431,7 +434,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    * Test that a WrongUsageException is thrown when the command is more than three words long
    */
   @Test(expected = WrongUsageException.class)
-  public void testProcessCommand_fourWords_wrongUsageException() {
+  public void testProcessCommand_fourWords_wrongUsageException() throws CommandException {
     ICommandSender commandSender = new MockUp<ICommandSender>() {
       @Mock
       World getEntityWorld() {
@@ -439,7 +442,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     }.getMockInstance();
 
-    commandGameRule.processCommand(commandSender,
+    commandGameRule.execute(null, commandSender,
         new String[] {"mobGriefing", "entityName", "value", "extraWord"});
   }
 
@@ -452,12 +455,12 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
 
     new MockUp<CommandGameRule>() {
       @Mock(invocations = 1)
-      List<?> addTabCompletionOptions(ICommandSender commandSender, String[] commandWords) {
+      List<?> getTabCompletionOptions(MinecraftServer server, ICommandSender commandSender, String[] commandWords, BlockPos pos) {
         return dummyTabCompletionOptions;
       }
     };
 
-    List<?> tabCompletionOptions = commandGameRule.addTabCompletionOptions(null, new String[1]);
+    List<?> tabCompletionOptions = commandGameRule.getTabCompletionOptions(null, null, new String[1], BlockPos.ORIGIN);
     Assert.assertThat("The returned tab completion options do no match the expected options.",
         tabCompletionOptions, CoreMatchers.is(dummyTabCompletionOptions));
   }
@@ -471,13 +474,13 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
 
     new MockUp<CommandGameRule>() {
       @Mock(invocations = 1)
-      List<?> addTabCompletionOptions(ICommandSender commandSender, String[] commandWords) {
+      List<?> getTabCompletionOptions(MinecraftServer server, ICommandSender commandSender, String[] commandWords, BlockPos pos) {
         return dummyTabCompletionOptions;
       }
     };
 
     List<?> tabCompletionOptions =
-        commandGameRule.addTabCompletionOptions(null, new String[] {"notMobGriefing", "true"});
+        commandGameRule.getTabCompletionOptions(null, null, new String[] {"notMobGriefing", "true"}, BlockPos.ORIGIN);
     Assert.assertThat("The returned tab completion options do no match the expected options.",
         tabCompletionOptions, CoreMatchers.is(dummyTabCompletionOptions));
   }
@@ -495,11 +498,11 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
       }
     }.getMockInstance();
 
-    String entityName = (String) EntityList.classToStringMapping.get(EntityZombie.class);
+    String entityName = EntityList.CLASS_TO_NAME.get(EntityZombie.class);
     worldSavedData.entityNamesToMobGriefingValue.put(entityName, Boolean.toString(true));
 
     List<?> returnedTabCompletionOptions =
-        commandGameRule.addTabCompletionOptions(commandSender, new String[] {"mobGriefing", ""});
+        commandGameRule.getTabCompletionOptions(null, commandSender, new String[] {"mobGriefing", ""}, BlockPos.ORIGIN);
     List<String> expectedTabCompletionOptions =
         Arrays.asList(Boolean.toString(true), Boolean.toString(false), entityName);
     Assert.assertThat("The returned tab completion options do no match the expected options.",
@@ -512,10 +515,10 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    */
   @Test
   public void testAddTabCompletionOptions_firstWordMobGriefingSecondWordEntityNameThirdWordTabComplete_trueFalse() {
-    String entityName = (String) EntityList.classToStringMapping.get(EntityZombie.class);
+    String entityName = (String) EntityList.CLASS_TO_NAME.get(EntityZombie.class);
 
     List<?> returnedTabCompletionOptions =
-        commandGameRule.addTabCompletionOptions(null, new String[] {"mobGriefing", entityName, ""});
+        commandGameRule.getTabCompletionOptions(null, null, new String[] {"mobGriefing", entityName, ""}, BlockPos.ORIGIN);
     List<String> expectedTabCompletionOptions = Arrays.asList(Boolean.toString(true),
         Boolean.toString(false), BetterMobGriefingGameRule.INHERIT);
     Assert.assertThat("The returned tab completion options do no match the expected options.",
@@ -529,7 +532,7 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
   @Test
   public void testAddTabCompletionOptions_firstWordMobGriefingSecondWordNotEntityNameThirdWordTabComplete_null() {
     List<?> returnedTabCompletionOptions =
-        commandGameRule.addTabCompletionOptions(null, new String[] {"mobGriefing", "true", ""});
+        commandGameRule.getTabCompletionOptions(null, null, new String[] {"mobGriefing", "true", ""}, BlockPos.ORIGIN);
     Assert.assertThat("The returned tab completion options do no match the expected options.",
         returnedTabCompletionOptions, CoreMatchers.nullValue());
   }
@@ -539,8 +542,8 @@ public class BetterMobGriefingGameRuleCommandGameRuleTest {
    */
   @Test
   public void testAddTabCompletionOptions_forthWordTabComplete_null() {
-    List<?> returnedTabCompletionOptions = commandGameRule.addTabCompletionOptions(null,
-        new String[] {"mobGriefing", "entityName", "true", ""});
+    List<?> returnedTabCompletionOptions = commandGameRule.getTabCompletionOptions(null, null,
+        new String[] {"mobGriefing", "entityName", "true", ""}, BlockPos.ORIGIN);
     Assert.assertThat("The returned tab completion options do no match the expected options.",
         returnedTabCompletionOptions, CoreMatchers.nullValue());
   }

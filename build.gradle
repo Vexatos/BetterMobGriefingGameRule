@@ -11,14 +11,18 @@ buildscript {
         }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT"
     }
 }
 
-apply plugin: "forge"
+apply plugin: "net.minecraftforge.gradle.forge"
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 // Mod information
-version = "1.7.10-0.4.0"
+def mod_version="0.4.0-patch"
+version = "1.10.2-${mod_version}"
 group= "com.judge40.minecraft.bettermobgriefinggamerule"
 archivesBaseName = "bettermobgriefinggamerule"
 
@@ -27,13 +31,19 @@ targetCompatibility = 1.8
 
 minecraft {
     // MinecraftForge version
-    version = "1.7.10-10.13.4.1558-1.7.10"
+    version = "1.10.2-12.18.1.2080"
+    runDir = "eclipse"
+    mappings = "snapshot_20161111"
 
-    // Use shared run directory if available
-    if (file("../run").exists()) {
-        runDir = "../run"
-    } else {
-        runDir = "run"
+    replaceIn "com/judge40/minecraft/bettermobgriefinggamerule/BetterMobGriefingGameRule.java"
+    replace "@VERSION@", mod_version
+}
+
+apply plugin: 'idea'
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+        outputDir = file('build/classes/main')
     }
 }
 

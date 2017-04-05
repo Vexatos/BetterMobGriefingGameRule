@@ -99,7 +99,7 @@ public class BetterMobGriefingGameRuleWorldSavedDataTest {
     worldSavedData.writeToNBT(nbtTagCompound);
 
     Assert.assertThat("The incorrect number of keys were found in the NBT data.",
-        nbtTagCompound.func_150296_c().size(),
+        nbtTagCompound.getKeySet().size(),
         CoreMatchers.is(worldSavedData.entityNamesToMobGriefingValue.size()));
 
     for (Entry<String, String> entry : worldSavedData.entityNamesToMobGriefingValue.entrySet()) {
@@ -114,14 +114,14 @@ public class BetterMobGriefingGameRuleWorldSavedDataTest {
    */
   @Test
   public void testForWorld_worldSavedDataExists_reuseWorldSavedData() {
-    world.mapStorage.setData(BetterMobGriefingGameRule.MODID, worldSavedData);
+    world.getMapStorage().setData(BetterMobGriefingGameRule.MODID, worldSavedData);
     BetterMobGriefingGameRuleWorldSavedData returnedWorldSavedData =
         BetterMobGriefingGameRuleWorldSavedData.forWorld(world);
     Assert.assertThat("The returned world saved data is not the existing instance.",
         returnedWorldSavedData, CoreMatchers.sameInstance(worldSavedData));
 
-    WorldSavedData storedWorldSavedData = world.mapStorage
-        .loadData(BetterMobGriefingGameRuleWorldSavedData.class, BetterMobGriefingGameRule.MODID);
+    WorldSavedData storedWorldSavedData = world.getMapStorage()
+        .getOrLoadData(BetterMobGriefingGameRuleWorldSavedData.class, BetterMobGriefingGameRule.MODID);
     Assert.assertThat("The map storage does not contain the expected world saved data.",
         storedWorldSavedData, CoreMatchers.sameInstance(worldSavedData));
   }
@@ -137,8 +137,8 @@ public class BetterMobGriefingGameRuleWorldSavedDataTest {
     Assert.assertThat("The returned world saved data is not the existing instance.",
         returnedWorldSavedData, CoreMatchers.not(CoreMatchers.sameInstance(worldSavedData)));
 
-    WorldSavedData storedWorldSavedData = world.mapStorage
-        .loadData(BetterMobGriefingGameRuleWorldSavedData.class, BetterMobGriefingGameRule.MODID);
+    WorldSavedData storedWorldSavedData = world.getMapStorage()
+        .getOrLoadData(BetterMobGriefingGameRuleWorldSavedData.class, BetterMobGriefingGameRule.MODID);
     Assert.assertThat("The map storage does not contain the expected world saved data.",
         storedWorldSavedData, CoreMatchers.sameInstance(returnedWorldSavedData));
   }
