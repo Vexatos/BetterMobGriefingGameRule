@@ -5,7 +5,7 @@
   "description": "\"Better mobGriefing GameRule\" is a Minecraft mod which improves the \"mobGriefing\" game rule, allowing separate values to be specified for individual types of entity.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "https://github.com/Judge40/BetterMobGriefingGameRule",
+  "url": "https://github.com/Vexatos/BetterMobGriefingGameRule",
   "updateUrl": "",
   "authorList": ["Judge40", "Vexatos"],
   "credits": "Made by Judge40, updated by Vexatos.",
