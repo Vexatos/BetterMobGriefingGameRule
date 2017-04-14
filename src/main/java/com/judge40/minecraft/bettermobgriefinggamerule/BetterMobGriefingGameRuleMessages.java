@@ -18,8 +18,6 @@
  */
 package com.judge40.minecraft.bettermobgriefinggamerule;
 
-import net.minecraft.client.resources.I18n;
-
 /**
  * Localisable UI messages for BetterMobGriefingGameRule
  */
@@ -30,13 +28,7 @@ public class BetterMobGriefingGameRuleMessages {
   public static final String GLOBAL_RULE_KEY = "bettermobgriefinggamerule.config.globalRule";
   public static final String ENTITY_RULES_KEY = "bettermobgriefinggamerule.config.entityRules";
 
-  // Configuration messages
-  public static final String DEFAULT_MOBGRIEFING_VALUES =
-      I18n.format(DEFAULT_MOBGRIEFING_VALUES_KEY);
-  public static final String GLOBAL_RULE = I18n.format(GLOBAL_RULE_KEY);
-  public static final String ENTITY_RULES = I18n.format(ENTITY_RULES_KEY);
-
   public static final String VALID_VALUES(Object validValues) {
-    return I18n.format("bettermobgriefinggamerule.config.validValues", validValues);
+    return String.format("[valid values: %s]", validValues);
   }
 }

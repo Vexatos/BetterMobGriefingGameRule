@@ -9,6 +9,3 @@ bettermobgriefinggamerule.config.globalRule=Global Rule
 bettermobgriefinggamerule.config.globalRule.tooltip=The global mobGriefing rules which affect multiple entities.
 bettermobgriefinggamerule.config.entityRules=Entity Rules
 bettermobgriefinggamerule.config.entityRules.tooltip=The entity specific mobGriefing rules which affects only the specified type of entity.
-
-
-bettermobgriefinggamerule.config.validValues=[valid values: %s]

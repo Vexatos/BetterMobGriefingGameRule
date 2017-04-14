@@ -21,7 +21,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 // Mod information
-def mod_version="0.4.1-patch"
+def mod_version="0.4.2-patch"
 version = "1.10.2-${mod_version}"
 group= "com.judge40.minecraft.bettermobgriefinggamerule"
 archivesBaseName = "bettermobgriefinggamerule"
