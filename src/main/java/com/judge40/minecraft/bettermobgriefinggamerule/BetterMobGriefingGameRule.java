@@ -18,26 +18,8 @@
  */
 package com.judge40.minecraft.bettermobgriefinggamerule;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-
 import com.judge40.minecraft.bettermobgriefinggamerule.command.BetterMobGriefingGameRuleCommandGameRule;
 import com.judge40.minecraft.bettermobgriefinggamerule.world.BetterMobGriefingGameRuleWorldSavedData;
-
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraft.command.CommandGameRule;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
@@ -56,6 +38,24 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Base class for 'Better mobGriefing GameRule' mod
@@ -95,7 +95,7 @@ public class BetterMobGriefingGameRule {
   /**
    * Perform pre-initialisation actions. The configuration file is loaded and the default
    * mobGriefing rule values are retrieved.
-   * 
+   *
    * @param preInitializationEvent The FMLPreInitializationEvent
    */
   @EventHandler
@@ -114,8 +114,6 @@ public class BetterMobGriefingGameRule {
     configuration.setCategoryLanguageKey(
         BetterMobGriefingGameRule.DEFAULT_ENTITY_RULES_CONFIGURATION_CATEGORY,
         BetterMobGriefingGameRuleMessages.ENTITY_RULES_KEY);
-
-    populateDefaultMobGriefingRulesFromConfiguration();
   }
 
   /**
@@ -148,17 +146,24 @@ public class BetterMobGriefingGameRule {
 
     // Get the configuration value for each entity, if the configuration entry is missing for an
     // entity then a new entry is created
-    for (String entityName : entityNames) {
-      Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(entityName);
+	  for(String entityName : EntityList.getEntityNameList()) {
+		  Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(entityName);
 
-      if (entityClass != null && EntityLiving.class.isAssignableFrom(entityClass)) {
-        String propertyValue = configuration.getString(entityName,
-            DEFAULT_ENTITY_RULES_CONFIGURATION_CATEGORY, BetterMobGriefingGameRule.INHERIT,
-            BetterMobGriefingGameRuleMessages.VALID_VALUES(validValues),
-            validValues.toArray(new String[validValues.size()]));
-        defaultEntityRules.put(entityName, propertyValue);
-      }
-    }
+		  if(entityClass != null && EntityLiving.class.isAssignableFrom(entityClass)) {
+			  for(String superName : entityNames) {
+				  Class<? extends Entity> superClass = EntityList.NAME_TO_CLASS.get(superName);
+
+				  if(superClass != null && EntityLiving.class.isAssignableFrom(superClass) && superClass.isAssignableFrom(entityClass)) {
+					  String propertyValue = configuration.getString(entityName,
+						  DEFAULT_ENTITY_RULES_CONFIGURATION_CATEGORY, BetterMobGriefingGameRule.INHERIT,
+						  BetterMobGriefingGameRuleMessages.VALID_VALUES(validValues),
+						  validValues.toArray(new String[validValues.size()]));
+					  defaultEntityRules.put(entityName, propertyValue);
+					  break;
+				  }
+			  }
+		  }
+	  }
 
     // Persist any changes to the configuration
     if (configuration.hasChanged()) {
@@ -168,7 +173,7 @@ public class BetterMobGriefingGameRule {
 
   /**
    * On initialisation registers the event handler
-   * 
+   *
    * @param initializationEvent The FMLInitializationEvent
    */
   @EventHandler
@@ -178,9 +183,14 @@ public class BetterMobGriefingGameRule {
     MinecraftForge.EVENT_BUS.register(eventHandler);
   }
 
+	@EventHandler
+	public void onFMLPostInitializationEvent(FMLPostInitializationEvent initializationEvent) {
+		populateDefaultMobGriefingRulesFromConfiguration();
+	}
+
   /**
    * On server starting add new mobGriefing game rules
-   * 
+   *
    * @param serverStartingEvent The FMLServerStartingEvent
    */
   @EventHandler()
@@ -229,7 +239,7 @@ public class BetterMobGriefingGameRule {
 
   /**
    * Whether mob griefing is enabled to the given {@link Entity}
-   * 
+   *
    * @param entity The Entity to get the mob griefing value for
    * @return Whether mob griefing is enabled
    */
