@@ -175,7 +175,6 @@ public class BetterMobGriefingGameRule {
   public void onFMLInitializationEvent(FMLInitializationEvent initializationEvent) {
     BetterMobGriefingGameRuleEventHandler eventHandler =
         new BetterMobGriefingGameRuleEventHandler();
-    FMLCommonHandler.instance().bus().register(eventHandler);
     MinecraftForge.EVENT_BUS.register(eventHandler);
   }
 
